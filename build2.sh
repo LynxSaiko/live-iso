@@ -1,4 +1,5 @@
 #!/bin/bash
+# [*] Author: LynxSaiko
 set -e
 
 LIVE_NAME="lfs-live"
