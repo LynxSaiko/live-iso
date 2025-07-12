@@ -77,7 +77,7 @@ cat > "$WORKDIR/iso/boot/grub/grub.cfg" << "EOF"
 set timeout=5
 set default=0
 
-menuentry "LFS Live ISO (Full)" {
+menuentry "LeakOS Shadow Edition" {
     linux /boot/vmlinuz root=/dev/ram0 rw
     initrd /boot/initrd.img
 }
