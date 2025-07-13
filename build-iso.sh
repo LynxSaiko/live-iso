@@ -78,7 +78,7 @@ cat > "$WORKDIR/iso/boot/grub/grub.cfg" << "EOF"
 set timeout=5
 set default=0
 
-menuentry "LFS Live ISO" {
+menuentry "LeakOS Live ISO" {
     linux /boot/vmlinuz root=/dev/sdb1 rw
     initrd /boot/initrd.img
 }
