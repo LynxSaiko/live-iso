@@ -59,6 +59,25 @@ INITRD_ROOT="$WORKDIR/initrd"
 cd "$INITRD_ROOT"
 mkdir -pv {bin,sbin,proc,sys,dev,tmp,newroot,lib,lib64,"$LIVE_MOUNT_POINT"}
 
+# Fungsi untuk mengumpulkan dependensi dari file biner
+collect_dependencies() {
+    local BINARY_PATH=$1
+    local INITRD_TARGET_DIR=$2
+
+    mkdir -p "$INITRD_TARGET_DIR"/{lib,lib64}
+
+    ldd "$BINARY_PATH" 2>/dev/null | awk '
+        /=>/ { print $3 }
+        !/=>/ && !/not a dynamic executable/ { print $1 }
+    ' | while read -r lib; do
+        if [[ -f "$lib" ]]; then
+            if [[ "$lib" =~ ^/(lib|lib64)/ ]]; then
+                cp -v "$lib" "$INITRD_TARGET_DIR${lib%/*}/"
+            fi
+        fi
+    done
+}
+
 # Biner penting
 COREUTILS_BINS="/bin/ls /bin/cat /bin/echo /bin/mkdir /bin/mknod /bin/mount /bin/umount /sbin/switch_root"
 
