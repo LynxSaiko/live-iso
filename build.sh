@@ -45,7 +45,7 @@ mkdir -pv "$WORKDIR"/{iso/boot/grub,rootfs,initrd}
 # ==========================
 echo "[+] Menyalin root filesystem ke $WORKDIR/rootfs..."
 rsync -aAXv --progress "$LFS_SOURCE_ROOT" "$WORKDIR/rootfs" \
-  --exclude={"/proc","/sys","/dev","/mnt","/media","/tmp","/boot","/lost-found","/var/log","/var/cache","/var/tmp"} \
+  --exclude={"/proc","/sys","/dev","/mnt","/media","/tmp","/boot","/lost-found","/var/log","/var/cache","/var/tmp", "/.cache", "/usr/share/doc", "/usr/share/man"} \
   --exclude="$WORKDIR" 
 
 echo "[+] Membuat $SQUASHFS_FILE dari rootfs..."
