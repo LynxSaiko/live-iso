@@ -6,17 +6,14 @@ set -e
 
 # --- KONFIGURASI ---
 LIVE_NAME="lfs-live"
-WORKDIR="/mnt/liveiso/${LIVE_NAME}-build-$$"  # Gunakan direktori sementara untuk build
+WORKDIR="/mnt/liveiso/${LIVE_NAME}-build-$$"
 ISO_NAME="/mnt/liveiso/${LIVE_NAME}.iso"
 SQUASHFS_FILE="rootfs.squashfs"
 
 # HANYA gunakan /dev/sdb1
 LIVE_PARTITION_DEV="/dev/sdb1"
-LIVE_MOUNT_POINT="/mnt/liveiso"  # Direktori mount untuk /dev/sdb1
-LFS_SOURCE_ROOT="/"  # Sumber filesystem untuk root (biasanya /)
-
-# GRUB Mod Directory (Menentukan lokasi modul-modul GRUB)
-GRUB_MOD_DIR="/usr/lib/grub/i386-pc"  # Menyesuaikan dengan direktori modul GRUB pada sistem kamu
+LIVE_MOUNT_POINT="/mnt/liveiso"
+LFS_SOURCE_ROOT="/"
 
 # Cek Tools yang Diperlukan
 REQUIRED_TOOLS="mksquashfs xorriso rsync cpio gzip"
@@ -31,12 +28,9 @@ done
 # PERSIAPAN: Mount Partisi dan Direktori
 # ==========================
 echo "[+] Mounting $LIVE_PARTITION_DEV ke $LIVE_MOUNT_POINT..."
-# Buat direktori jika belum ada
 mkdir -p "$LIVE_MOUNT_POINT"
-# Mount partisi /dev/sdb1 ke /mnt/liveiso
 mount "$LIVE_PARTITION_DEV" "$LIVE_MOUNT_POINT"
 
-# Membuat Struktur Direktori untuk ISO dan initramfs
 echo "[+] Membuat struktur direktori ISO di $WORKDIR..."
 mkdir -pv "$WORKDIR"/{iso/boot/grub,rootfs,initrd}
 
@@ -45,8 +39,8 @@ mkdir -pv "$WORKDIR"/{iso/boot/grub,rootfs,initrd}
 # ==========================
 echo "[+] Menyalin root filesystem ke $WORKDIR/rootfs..."
 rsync -aAXv --progress "$LFS_SOURCE_ROOT" "$WORKDIR/rootfs" \
-  --exclude={"/proc","/sys","/dev","/mnt","/media","/tmp","/boot","/lost-found","/var/log","/var/cache","/var/tmp", "/.cache", "/usr/share/doc", "/usr/share/man"} \
-  --exclude="$WORKDIR" 
+  --exclude={"/proc","/sys","/dev","/mnt","/media","/tmp","/boot","/lost-found","/var/log","/var/cache","/var/tmp","/.cache","/usr/share/doc","/usr/share/man"} \
+  --exclude="$WORKDIR"
 
 echo "[+] Membuat $SQUASHFS_FILE dari rootfs..."
 mksquashfs "$WORKDIR/rootfs" "$WORKDIR/iso/boot/$SQUASHFS_FILE" -comp xz
@@ -56,10 +50,8 @@ mksquashfs "$WORKDIR/rootfs" "$WORKDIR/iso/boot/$SQUASHFS_FILE" -comp xz
 # ==========================
 echo "[+] Menyiapkan Initramfs..."
 INITRD_ROOT="$WORKDIR/initrd"
-cd "$INITRD_ROOT"
-mkdir -pv {bin,sbin,proc,sys,dev,tmp,newroot,lib,lib64,"$LIVE_MOUNT_POINT"}
+mkdir -pv "$INITRD_ROOT"/{bin,sbin,proc,sys,dev,tmp,newroot,lib,lib64,"$LIVE_MOUNT_POINT"}
 
-# Fungsi untuk mengumpulkan dependensi dari file biner
 collect_dependencies() {
     local BINARY_PATH=$1
     local INITRD_TARGET_DIR=$2
@@ -78,7 +70,6 @@ collect_dependencies() {
     done
 }
 
-# Biner penting
 COREUTILS_BINS="/bin/ls /bin/cat /bin/echo /bin/mkdir /bin/mknod /bin/mount /bin/umount /sbin/switch_root"
 
 for bin in $COREUTILS_BINS; do
@@ -160,7 +151,7 @@ KERNEL_VERSION=$(uname -r)
 cp -v "/boot/vmlinuz-${KERNEL_VERSION}" "$WORKDIR/iso/boot/vmlinuz"
 
 # ==========================
-# 5. GRUB CONFIG & BOOTLOADER
+# 5. GRUB CONFIG
 # ==========================
 echo "[+] Menyiapkan GRUB..."
 
@@ -186,7 +177,7 @@ xorriso -as mkisofs \
     -graft-points \
     -boot-load-size 4 \
     -boot-info-table \
-    -b boot/grub/core.img \
+    -b boot/grub/grub.cfg \
     -no-emul-boot \
     -isohybrid-mbr "$MBR_BOOT_IMG" \
     -output "$ISO_NAME" \
