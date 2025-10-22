@@ -6,8 +6,8 @@ set -e
 
 # --- KONFIGURASI ---
 LIVE_NAME="lfs-live"
-WORKDIR="/home/leakos/${LIVE_NAME}-build-$$"  # Gunakan direktori sementara untuk build
-ISO_NAME="/home/leakos/${LIVE_NAME}.iso"
+WORKDIR="/mnt/liveiso/${LIVE_NAME}-build-$$"  # Gunakan direktori sementara untuk build
+ISO_NAME="/mnt/liveiso/${LIVE_NAME}.iso"
 SQUASHFS_FILE="rootfs.squashfs"
 
 # HANYA gunakan /dev/sdb1
