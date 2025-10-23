@@ -5,7 +5,8 @@
 set -e
 
 # --- KONFIGURASI ---
-LIVE_NAME="lfs-live"
+LIVE_BUILD_DIR=$(find /mnt/liveiso/ -type d -name "${LIVE_NAME}-build*" | head -n1)
+LIVE_NAME="leakos"
 WORKDIR="/mnt/liveiso/${LIVE_NAME}-build-$$"
 ISO_NAME="/mnt/liveiso/${LIVE_NAME}.iso"
 SQUASHFS_FILE="rootfs.squashfs"
@@ -43,7 +44,7 @@ rsync -aAXv --progress "$LFS_SOURCE_ROOT" "$WORKDIR/rootfs" \
   --exclude="$WORKDIR"
 
 echo "[+] Membuat $SQUASHFS_FILE dari rootfs..."
-mksquashfs "$WORKDIR/rootfs" "$WORKDIR/iso/boot/$SQUASHFS_FILE" -comp xz
+mksquashfs "$WORKDIR/rootfs" "$WORKDIR/iso/boot/$SQUASHFS_FILE" -comp gzip
 
 # ==========================
 # 2. MENYIAPKAN INITRAMFS
@@ -80,6 +81,17 @@ for bin in $COREUTILS_BINS; do
 done
 chmod +x "$INITRD_ROOT"/bin/* "$INITRD_ROOT"/sbin/*
 
+# Salin modul kernel yang diperlukan ke Initrd (minimal)
+echo "[+] Menyalin modul kernel dasar..."
+MODULES_TO_COPY="kernel/fs kernel/lib kernel/drivers/block kernel/drivers/ata kernel/drivers/scsi kernel/drivers/usb kernel/drivers/gpu/drm"
+mkdir -p "$INITRD_ROOT/lib/modules/$KERNEL_VERSION"
+for mod_path in $MODULES_TO_COPY; do
+    cp -Rv /lib/modules/$KERNEL_VERSION/$mod_path "$INITRD_ROOT/lib/modules/$KERNEL_VERSION/"
+done
+depmod -b "$INITRD_ROOT" "$KERNEL_VERSION" # Update dependency modules di initrd
+
+GRAPHICS_MODULES="i915 amdgpu nouveau"
+
 # ==========================
 # 3. BUAT SCRIPT INIT SEDERHANA
 # ==========================
@@ -89,6 +101,8 @@ cat > "$INITRD_ROOT/init" << EOF
 # Skrip init LiveCD - Hanya untuk /dev/sdb1
 
 export PATH=/bin:/sbin
+SQUASHFS_FILE="$SQUASHFS_FILE"
+
 
 echo "=== Booting LFS LiveCD ==="
 echo "Target device: $LIVE_PARTITION_DEV"
@@ -97,6 +111,16 @@ echo "Target device: $LIVE_PARTITION_DEV"
 mount -t proc proc /proc
 mount -t sysfs sys /sys
 mount -t devtmpfs dev /dev
+
+# Initialize udev/mdev untuk device node
+/sbin/udevadm trigger
+/sbin/udevadm settle
+
+# Muat modul kernel yang diperlukan (termasuk potensi driver grafis)
+for mod in $GRAPHICS_MODULES; do
+    echo "Memuat \$mod..."
+    /sbin/modprobe \$mod 2>/dev/null
+done
 
 # Buat device node untuk loop
 mknod /dev/loop0 b 7 0 2>/dev/null
@@ -148,7 +172,7 @@ find . -print0 | cpio --null -ov --format=newc | gzip -9 > "$WORKDIR/iso/boot/in
 
 echo "[+] Menyalin kernel..."
 KERNEL_VERSION=$(uname -r)
-cp -v "/boot/vmlinuz-${KERNEL_VERSION}" "$WORKDIR/iso/boot/vmlinuz"
+cp -v "/boot/vmlinuz" "$WORKDIR/iso/boot/vmlinuz"
 
 # ==========================
 # 5. GRUB CONFIG
@@ -159,7 +183,7 @@ echo "[+] Menyiapkan GRUB..."
 cat > "$WORKDIR/iso/boot/grub/grub.cfg" << EOF
 set timeout=5
 set default=0
-menuentry "LFS LiveCD - /dev/sdb1" {
+menuentry "LeakOS LiveCD" {
     linux /boot/vmlinuz
     initrd /boot/initrd.img
 }
