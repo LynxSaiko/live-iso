@@ -7,7 +7,7 @@ set -e
 # --- KONFIGURASI ---
 LIVE_BUILD_DIR=$(find /mnt/liveiso/ -type d -name "${LIVE_NAME}-build*" | head -n1)
 LIVE_NAME="leakos"
-WORKDIR="/mnt/liveiso/${LIVE_NAME}-build-$$"
+WORKDIR="${LIVE_BUILD_DIR}"
 ISO_NAME="/mnt/liveiso/${LIVE_NAME}.iso"
 SQUASHFS_FILE="rootfs.squashfs"
 
