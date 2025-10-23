@@ -102,7 +102,7 @@ cat > "$INITRD_ROOT/init" << EOF
 #!/bin/sh
 # Skrip init LiveCD - Hanya untuk /dev/sdb1
 
-export PATH=/bin:/sbin
+export PATH=/bin:/sbin:/usr/bin:/usr/local/bin
 SQUASHFS_FILE="$SQUASHFS_FILE"
 
 
