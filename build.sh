@@ -16,6 +16,7 @@ LIVE_PARTITION_DEV="/dev/sdb1"
 LIVE_MOUNT_POINT="/mnt/liveiso"
 LFS_SOURCE_ROOT="/"
 KERNEL_VERSION=$(uname -r)
+MBR_BOOT_IMG="/usr/lib/grub/i386-pc/boot_hybrid.img"
 
 # Cek Tools yang Diperlukan
 REQUIRED_TOOLS="mksquashfs xorriso rsync cpio gzip"
@@ -194,7 +195,7 @@ EOF
 # ==========================
 echo "[+] Membuat ISO: $ISO_NAME..."
 
-MBR_BOOT_IMG="/usr/lib/grub/i386-pc/boot_hybrid.img"
+
 xorriso -as mkisofs \
     -iso-level 3 \
     -volid "LFS_LIVE" \
