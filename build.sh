@@ -15,6 +15,7 @@ SQUASHFS_FILE="rootfs.squashfs"
 LIVE_PARTITION_DEV="/dev/sdb1"
 LIVE_MOUNT_POINT="/mnt/liveiso"
 LFS_SOURCE_ROOT="/"
+KERNEL_VERSION=$(uname -r)
 
 # Cek Tools yang Diperlukan
 REQUIRED_TOOLS="mksquashfs xorriso rsync cpio gzip"
