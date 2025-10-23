@@ -172,7 +172,6 @@ cd "$WORKDIR/initrd"
 find . -print0 | cpio --null -ov --format=newc | gzip -9 > "$WORKDIR/iso/boot/initrd.img"
 
 echo "[+] Menyalin kernel..."
-KERNEL_VERSION=$(uname -r)
 cp -v "/boot/vmlinuz" "$WORKDIR/iso/boot/vmlinuz"
 
 # ==========================
