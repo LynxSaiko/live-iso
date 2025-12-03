@@ -6,7 +6,7 @@ set -e
 
 # Configuration
 SOURCE_DIR="/"                    # Root filesystem LFS Anda
-ISO_NAME="lfs-mbr-$(date +%Y%m%d)"
+ISO_NAME="leakos-$(date +%Y%m%d)"
 WORK_DIR="/mnt/leakos"
 OUTPUT_DIR="$PWD/iso"
 
