@@ -38,9 +38,6 @@ check_prerequisites() {
 prepare_workspace() {
     log "Menyiapkan workspace..."
     
-    rm -rf "$WORK_DIR"
-    mkdir -p "$WORK_DIR"
-    mkdir -p "$OUTPUT_DIR"
     
     # Buat struktur LiveCD
     mkdir -p "$WORK_DIR"/{boot,isolinux,live}
